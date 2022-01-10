@@ -34,6 +34,9 @@ Doesn't generate a proof, but will create the trace of running the program -- wh
 make run
 ```
 
+To change the particular puzzle that the proof should be generated over, edit the `puzzle` and `solution` grids
+in the python section of [main.cairo](./contracts/main.cairo).
+
 ## Program Output
 
 The first word of the output is the Ethereum address (encoded as an integer) of the user that solved the puzzle.
