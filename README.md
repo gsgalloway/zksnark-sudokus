@@ -35,7 +35,7 @@ make run
 ```
 
 To change the particular puzzle that the proof should be generated over, edit the `puzzle` and `solution` grids
-in the python section of [main.cairo](./contracts/main.cairo#29).
+in the python section of [main.cairo](./contracts/main.cairo#L29).
 
 ## Program Output
 
