@@ -1,7 +1,10 @@
-%builtins output range_check
+%builtins output pedersen range_check
 
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.serialize import serialize_word
+from starkware.cairo.common.hash_chain import hash_chain
+from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.memcpy import memcpy
 
 from contracts.util.verify_rows import verify_rows
 from contracts.util.verify_columns import verify_columns
@@ -12,10 +15,15 @@ from contracts.util.types import NUM_CELLS, CELL_SIZE
 # cells without a value provided in the initial puzzle are assumed to have a value of 0
 const SENTINEL_CELL_UNSET = 0
 
-func main{output_ptr: felt*, range_check_ptr}():
+func main{
+        output_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+}():
     alloc_locals
     let (local solution: felt**) = alloc()
     let (local puzzle: felt**) = alloc()
+    local solver_address: felt
     %{
         _ = ids.SENTINEL_CELL_UNSET
         puzzle = [
@@ -53,6 +61,8 @@ func main{output_ptr: felt*, range_check_ptr}():
             for col in range(9):
                 offset = row * 9 + col
                 memory[ids.solution + offset] = solution[row][col]
+
+        ids.solver_address = 0x2Db8c2615db39a5eD8750B87aC8F217485BE11EC
     %}
 
     # Check solution is valid
@@ -63,26 +73,30 @@ func main{output_ptr: felt*, range_check_ptr}():
     # # Confirm input puzzle matches the given solution
     verify_puzzle_matches_solution(puzzle, solution)
 
+    # The address of the puzzle solver
+    serialize_word(solver_address)
+
     # The puzzle's solution should be private but the puzzle
     # itself should be output publicly so a verifier can
-    # identify which puzzle the prover solved.
-    serialize_puzzle(puzzle)
+    # identify which puzzle the prover solved. We output a hash
+    # of the input puzzle instead of the full puzzle to save
+    # space.
+    serialize_puzzle{hash_ptr=pedersen_ptr}(puzzle)
 
     return ()
 end
 
-func serialize_puzzle{output_ptr: felt*}(puzzle: felt*):
+func serialize_puzzle{output_ptr: felt*, hash_ptr: HashBuiltin*}(puzzle: felt*):
     alloc_locals
-    serialize_puzzle_recursive(puzzle, NUM_CELLS)
+
+    # hash_chain requires the 0th element of the array being hashed be the length of the array
+    let (local puzzle_copy: felt*) = alloc()
+    assert puzzle_copy[0] = NUM_CELLS
+    memcpy(puzzle_copy+1, puzzle, NUM_CELLS)
+
+    let (local puzzle_hash) = hash_chain(puzzle_copy)
+    serialize_word(puzzle_hash)
+
     return ()
 end
 
-func serialize_puzzle_recursive{output_ptr: felt*}(puzzle: felt*, size: felt):
-    alloc_locals
-    if size == 0:
-        return ()
-    end
-    serialize_word(puzzle[0])
-    serialize_puzzle_recursive(puzzle+1, size-1)
-    return ()
-end
