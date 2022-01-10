@@ -1,7 +1,7 @@
 %builtins output range_check
 
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.serialize import serialize_array, serialize_word
+from starkware.cairo.common.serialize import serialize_word
 
 from contracts.util.verify_rows import verify_rows
 from contracts.util.verify_columns import verify_columns
