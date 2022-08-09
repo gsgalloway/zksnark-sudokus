@@ -13,7 +13,7 @@ pip install -r requirements.txt
 ## Compile
 
 ```sh
-make compile
+make build
 ```
 
 ## Calculate Program Hash
