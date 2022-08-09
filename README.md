@@ -44,5 +44,4 @@ The second word of the output is a hash of the initial puzzle, where a value of 
 omitted in the puzzle. See [here](https://github.com/starkware-libs/cairo-lang/blob/e8823212248a37cd5bf85bfb4885b89030566696/src/starkware/cairo/common/hash_chain.py)
 for a reference for recreating a puzzle's hash
 
-The program runs without error if the given solution is a valid solution, and corresponds to the given puzzle input.
-This could be make more cost efficient by outputting a hash of the puzzle instead of the whole puzzle.
+The program runs without error if the given solution is a valid solution, and is the solution for the given puzzle input.
