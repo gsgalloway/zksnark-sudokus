@@ -2,40 +2,17 @@
 
 Proves knowledge of the solution to a given Sudoku puzzle.
 
-## Setup
-
-With python >= 3.7:
-
-```sh
-pip install -r requirements.txt
-```
-
-## Compile
-
-```sh
-make build
-```
-
-## Calculate Program Hash
-
-Returns the hash of the program, excluding any inputs and outputs. Used to by verifiers to cheaply identify 
-proofs that are generated for this particular program.
-
-```sh
-make program-hash
-```
-
 ## Run Locally
 
 Doesn't generate a proof, but will create the trace of running the program -- which can be fed to a prover like
 [SHARP](https://www.cairo-lang.org/docs/sharp.html)
 
 ```sh
-make run
+./cairo/run.s
 ```
 
 To change the particular puzzle that the proof should be generated over, edit the `puzzle` and `solution` grids
-in the python section of [main.cairo](./contracts/main.cairo#L29).
+in the python section of [main.cairo](./src/main.cairo#L31).
 
 ## Program Output
 
