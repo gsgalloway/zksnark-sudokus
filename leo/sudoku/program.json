@@ -1,0 +1,10 @@
+{
+    "program": "sudoku.aleo",
+    "version": "0.0.0",
+    "description": "",
+    "development": {
+        "private_key": "APrivateKey1zkpHEsDga1eWNxNPihy7wRbMWXeZdGbjNVV3GbuNqiK61TS",
+        "address": "aleo13ppg9e82l0zej8c93rc84epaejh34xrkr6qfq29nvjzqgysvqqrsgkre6p"
+    },
+    "license": "MIT"
+}
