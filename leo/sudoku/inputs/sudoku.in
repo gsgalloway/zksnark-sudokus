@@ -1,4 +1,204 @@
 // The program input for sudoku/src/main.leo
-[main]
-public a: u32 = 1u32;
-b: u32 = 2u32;
+[verify_solution]
+public puzzle: Board = Board {
+    r1: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r2: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r3: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r4: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r5: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r6: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r7: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r8: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r9: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+};
+solution: Board = Board {
+    r1: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r2: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r3: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r4: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r5: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r6: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r7: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r8: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+    r9: Board {
+        c1: 0u8,
+        c2: 0u8,
+        c3: 0u8,
+        c4: 0u8,
+        c5: 0u8,
+        c6: 0u8,
+        c7: 0u8,
+        c8: 0u8,
+        c9: 0u8
+    },
+};
