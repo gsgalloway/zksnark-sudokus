@@ -8,10 +8,4 @@ docker run --rm \
     -v $BASEDIR/sudoku:/sudoku \
     -w /sudoku \
     $IMAGE \
-    leo build
-
-docker run --rm \
-    -v $BASEDIR/sudoku:/sudoku \
-    -w /sudoku \
-    $IMAGE \
     leo run verify_solution
