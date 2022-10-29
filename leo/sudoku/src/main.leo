@@ -191,6 +191,7 @@ program sudoku.aleo {
     function check_all_nine_digits(part1: NineDigitsPart1, part2: NineDigitsPart2) -> bool {
         // We don't have hashsets or constant-time array lookups via prover hints, but we
         // do have bitwise operations! So we can use a bitmap as a set.
+        // Note that subtraction is automatically safe from underflow in Aleo.
         let bitshift_1: u16 = part1.n1 - 1u16;
         let bitshift_2: u16 = part1.n2 - 1u16;
         let bitshift_3: u16 = part1.n3 - 1u16;
