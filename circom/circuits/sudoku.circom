@@ -5,9 +5,6 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 template Main() {
   signal input puzzle[81];
   signal input solution[81];
-  signal x <-- puzzle[0];
-  signal x_squared;
-  signal x_cubed;
   signal output out;
 
   // Check all values less than 10
@@ -41,9 +38,6 @@ template Main() {
     checkSolutionMatchesPuzzle.solution[i] <== solution[i];
   }
 
-  x_squared <== x * x;
-  x_cubed <== x_squared * x;
-//   out <== checkNineNumbers(1, 2, 3, 4, 5, 6, 7, 8, 9);
   out <== 1;
 }
 
