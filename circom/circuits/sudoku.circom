@@ -5,7 +5,7 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 template Main() {
   signal input puzzle[9][9];
   signal input solution[9][9];
-  signal output out;
+  signal input solverAddress;
 
   // Check all values less than 10
   component checkInRange = checkNumbersInRange();
@@ -47,8 +47,6 @@ template Main() {
         checkSolutionMatchesPuzzle.solution[row][col] <== solution[row][col];
     }
   }
-
-  out <== 1;
 }
 
 template checkRows() {
@@ -187,4 +185,4 @@ template checkNumbersInRange() {
     }
 }
 
-component main{public [puzzle]} = Main();
+component main{public [puzzle, solverAddress]} = Main();
