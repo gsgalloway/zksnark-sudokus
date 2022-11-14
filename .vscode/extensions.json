@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "iden3.circom",
-        "aleohq.leo-extension"
+        "aleohq.leo-extension",
+        "rust-lang.rust-analyzer"
     ]
 }
