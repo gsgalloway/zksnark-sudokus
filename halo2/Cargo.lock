@@ -710,20 +710,6 @@ dependencies = [
  "ff 0.12.1",
  "group 0.12.1",
  "halo2curves",
- "rand_core",
- "rayon",
- "tracing",
-]
-
-[[package]]
-name = "halo2_proofs"
-version = "0.2.0"
-source = "git+https://github.com/privacy-scaling-explorations/halo2.git#5fc8ce89ef3235d8eefeb8994173ac706e89e4ec"
-dependencies = [
- "blake2b_simd",
- "ff 0.12.1",
- "group 0.12.1",
- "halo2curves",
  "plotters",
  "rand_core",
  "rayon",
@@ -754,7 +740,7 @@ version = "0.1.0"
 source = "git+https://github.com/privacy-scaling-explorations/halo2wrong.git#63bde545d934e69c806ef9bc8b18f03f6ec0fe8e"
 dependencies = [
  "group 0.12.1",
- "halo2_proofs 0.2.0 (git+https://github.com/privacy-scaling-explorations/halo2?tag=v2022_10_22)",
+ "halo2_proofs",
  "num-bigint",
  "num-integer",
  "num-traits",
@@ -1379,7 +1365,7 @@ dependencies = [
  "criterion",
  "ff 0.12.1",
  "group 0.12.1",
- "halo2_proofs 0.2.0 (git+https://github.com/privacy-scaling-explorations/halo2.git)",
+ "halo2_proofs",
  "halo2wrong",
  "maingate",
  "num-bigint",

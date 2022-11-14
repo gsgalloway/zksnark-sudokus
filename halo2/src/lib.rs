@@ -19,15 +19,20 @@ impl SudokuConfig {
         let main_gate_config = MainGate::configure(meta);
         SudokuConfig { main_gate_config }
     }
+
+    fn main_gate<F: FieldExt>(&self) -> MainGate<F> {
+        MainGate::<F>::new(self.main_gate_config.clone())
+    }
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct SudokuCircuit {
+pub struct SudokuCircuit<F: FieldExt> {
     pub board: [[u8; 9]; 9],
     pub solution: [[u8; 9]; 9],
+    marker: PhantomData<F>,
 }
 
-impl<F: FieldExt> Circuit<F> for SudokuCircuit {
+impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
     type Config = SudokuConfig;
     type FloorPlanner = SimpleFloorPlanner;
 
@@ -39,7 +44,15 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit {
         SudokuConfig::new(meta)
     }
 
-    fn synthesize(&self, config: Self::Config, layouter: impl Layouter<F>) -> Result<(), Error> {
+    fn synthesize(
+        &self,
+        config: Self::Config,
+        mut layouter: impl Layouter<F>,
+    ) -> Result<(), Error> {
+        let main_gate: MainGate<F> = config.main_gate();
+
+        layouter.assign_region(|| "region 0", |region| Ok(()));
+
         Ok(())
     }
 }
@@ -87,29 +100,28 @@ mod test {
                 [9, 7, 4, 2, 8, 6, 5, 3, 1],
                 [3, 2, 5, 1, 9, 7, 8, 4, 6],
             ],
+            marker: PhantomData,
         };
 
         use plotters::prelude::*;
         let drawing_area = BitMapBackend::new("layout.png", (1024, 768)).into_drawing_area();
         drawing_area.fill(&WHITE).unwrap();
         let drawing_area = drawing_area
-            .titled("Example Circuit Layout", ("sans-serif", 60))
+            .titled("Sudoku Circuit", ("sans-serif", 60))
             .unwrap();
 
-        // halo2_proofs::dev::CircuitLayout::default()
-        //     // You can optionally render only a section of the circuit.
-        //     // .view_width(0..10)
-        //     // .view_height(0..16)
-        //     // You can hide labels, which can be useful with smaller areas.
-        //     .show_labels(true)
-        //     .mark_equality_cells(true)
-        //     .show_equality_constraints(true)
-        //     // Render the circuit onto your area!
-        //     // The first argument is the size parameter for the circuit.
-        //     .render(5, &circuit, &drawing_area)
-        //     .unwrap();
-
-        // println!("Hi {}", circuit_dot_graph(&circuit));
+        halo2wrong::halo2::dev::CircuitLayout::default()
+            // You can optionally render only a section of the circuit.
+            // .view_width(0..10)
+            // .view_height(0..16)
+            // You can hide labels, which can be useful with smaller areas.
+            .show_labels(true)
+            .mark_equality_cells(true)
+            .show_equality_constraints(true)
+            // Render the circuit onto your area!
+            // The first argument is the size parameter for the circuit.
+            .render(5, &circuit, &drawing_area)
+            .unwrap();
 
         // Arrange the public input. We expose the multiplication result in row 0
         // of the instance column, so we position it there in our public inputs.

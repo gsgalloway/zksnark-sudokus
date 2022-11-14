@@ -6,9 +6,9 @@ version = "0.1.0"
 [dependencies]
 ff = "0.12"
 group = "0.12.0"
-halo2_proofs = {git = "https://github.com/privacy-scaling-explorations/halo2.git", features = ["dev-graph"]}
-halo2wrong = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git", default-features = false}
-maingate = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git"}
+halo2 = {package = "halo2_proofs", git = "https://github.com/privacy-scaling-explorations/halo2", tag = "v2022_10_22", features = ["dev-graph"]}
+halo2wrong = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git", default-features = true}
+maingate = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git", default-features = true}
 num-bigint = "0.4.3"
 num-integer = "0.1.45"
 num-traits = "0.2.15"
