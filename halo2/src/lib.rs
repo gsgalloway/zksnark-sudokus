@@ -15,17 +15,17 @@ use std::marker::PhantomData;
 #[derive(Clone, Debug)]
 pub struct SudokuConfig {
     main_gate_config: MainGateConfig,
-    board: Column<Instance>,
+    public_input_puzzle: Column<Instance>,
 }
 
 impl SudokuConfig {
     pub fn new<F: FieldExt>(meta: &mut ConstraintSystem<F>) -> Self {
         let main_gate_config = MainGate::configure(meta);
-        let board = meta.instance_column();
-        meta.enable_equality(board);
+        let puzzle = meta.instance_column();
+        meta.enable_equality(puzzle);
         SudokuConfig {
             main_gate_config,
-            board,
+            public_input_puzzle: puzzle,
         }
     }
 
@@ -46,7 +46,6 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
     type FloorPlanner = SimpleFloorPlanner;
 
     fn without_witnesses(&self) -> Self {
-        // TODO: is this where I assert that the boards are 9x9?
         Self::default()
     }
 
@@ -84,12 +83,12 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                 }
 
                 // check each 3x3 square
-                for row_start in [0, 3, 6] {
-                    for col_start in [0, 3, 6] {
-                        let row_end = row_start + 3;
-                        let col_end = col_start + 3;
-                        let square =
-                            solution_cells.slice(s![row_start..row_end, col_start..col_end]);
+                for sq_start_row in [0, 3, 6] {
+                    for sq_start_col in [0, 3, 6] {
+                        let sq_end_row = sq_start_row + 3;
+                        let sq_end_col = sq_start_col + 3;
+                        let square = solution_cells
+                            .slice(s![sq_start_row..sq_end_row, sq_start_col..sq_end_col]);
                         self.check_nine_cells(&config, ctx, square)?;
                     }
                 }
@@ -110,32 +109,18 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                         )?;
                     }
                 }
-
-                // expose the board as public inputs
-                // for (i, cell) in board_cells.iter().enumerate() {
-                // region.constrain_instance(board_cells[[0, 0]].cell(), config.board, 0)?;
-                // }
-
                 Ok(())
             },
         )?;
 
-        // layouter.constrain_instance(board_cells[[0, 0]].cell(), config.board, 0)?;
-        // layouter.constrain_instance(board_cells[[0, 1]].cell(), config.board, 1)?;
-
-        // main_gate.expose_public(layouter, cell, public_input_idx)?;
-
         // mark each cell of the board as public input
         for (public_input_idx, assigned_value) in board_cells.iter().enumerate() {
-            layouter.constrain_instance(assigned_value.cell(), config.board, public_input_idx)?;
+            layouter.constrain_instance(
+                assigned_value.cell(),
+                config.public_input_puzzle,
+                public_input_idx,
+            )?;
         }
-
-        // .map(|(public_input_idx, board_cell)| {
-        //     main_gate.expose_public(layouter, board_cell, public_input_idx)
-        // });
-        // main_gate.expose_public(layouter, board_cells[[0, 0]].clone(), 0)?;
-        // main_gate.expose_public(layouter, board_cells[[0, 1]].clone(), 1)?;
-        // layouter.constrain_instance(board_cells[[0, 0]], main_gate.loaded()., row)
 
         Ok(())
     }
@@ -205,10 +190,14 @@ impl<F: FieldExt> SudokuCircuit<F> {
 }
 #[cfg(test)]
 mod test {
+    use halo2::dev::VerifyFailure;
+
     use super::*;
 
-    #[test]
-    fn test_sudoku() {
+    fn prove_and_verify_circuit(
+        puzzle: Array2<u8>,
+        solution: Array2<u8>,
+    ) -> Result<(), Vec<VerifyFailure>> {
         use halo2wrong::halo2::{dev::MockProver, halo2curves::bn256::Fr as Fp};
 
         // The number of rows in our circuit cannot exceed 2^k.
@@ -216,50 +205,10 @@ mod test {
 
         // Instantiate the circuit with its inputs
         let circuit = SudokuCircuit {
-            puzzle: array![
-                [0, 0, 0, 2, 6, 0, 7, 0, 1],
-                [6, 8, 0, 0, 7, 0, 0, 9, 0],
-                [1, 9, 0, 0, 0, 4, 5, 0, 0],
-                [8, 2, 0, 1, 0, 0, 0, 4, 0],
-                [0, 0, 4, 6, 0, 2, 9, 0, 0],
-                [0, 5, 0, 0, 0, 3, 0, 2, 8],
-                [0, 0, 9, 3, 0, 0, 0, 7, 4],
-                [0, 4, 0, 0, 5, 0, 0, 3, 6],
-                [7, 0, 3, 0, 1, 8, 0, 0, 0],
-            ],
-            solution: array![
-                [4, 3, 5, 2, 6, 9, 7, 8, 1],
-                [6, 8, 2, 5, 7, 1, 4, 9, 3],
-                [1, 9, 7, 8, 3, 4, 5, 6, 2],
-                [8, 2, 6, 1, 9, 5, 3, 4, 7],
-                [3, 7, 4, 6, 8, 2, 9, 1, 5],
-                [9, 5, 1, 7, 4, 3, 6, 2, 8],
-                [5, 1, 9, 3, 2, 6, 8, 7, 4],
-                [2, 4, 8, 9, 5, 7, 1, 3, 6],
-                [7, 6, 3, 4, 1, 8, 2, 5, 9],
-            ],
+            puzzle,
+            solution,
             marker: PhantomData,
         };
-
-        use plotters::prelude::*;
-        let drawing_area = BitMapBackend::new("layout.png", (1024, 768)).into_drawing_area();
-        drawing_area.fill(&WHITE).unwrap();
-        let drawing_area = drawing_area
-            .titled("Sudoku Circuit", ("sans-serif", 60))
-            .unwrap();
-
-        halo2wrong::halo2::dev::CircuitLayout::default()
-            // You can optionally render only a section of the circuit.
-            // .view_width(0..10)
-            // .view_height(0..16)
-            // You can hide labels, which can be useful with smaller areas.
-            .show_labels(true)
-            .mark_equality_cells(true)
-            .show_equality_constraints(true)
-            // Render the circuit onto your area!
-            // The first argument is the size parameter for the circuit.
-            .render(5, &circuit, &drawing_area)
-            .unwrap();
 
         // Arrange the public inputs.
         // `maingate` registers its own Instance column which we are not using, so that column's
@@ -273,13 +222,164 @@ mod test {
 
         let public_inputs = vec![public_input_maingate, public_input_puzzle];
 
-        // Given the correct public input, our circuit will verify.
+        // Run prover and return result of attempting to verify
         let prover = MockProver::run(k, &circuit, public_inputs).unwrap();
-        assert_eq!(prover.verify(), Ok(()));
 
-        // If we try some other public input, the proof will fail!
-        // public_inputs[0] += Fp::one();
-        // let prover = MockProver::run(k, &circuit, vec![public_inputs]).unwrap();
-        // assert!(prover.verify().is_err());
+        prover.verify()
+    }
+
+    #[test]
+    fn test_happy_path() {
+        let puzzle = array![
+            [0, 0, 0, 2, 6, 0, 7, 0, 1],
+            [6, 8, 0, 0, 7, 0, 0, 9, 0],
+            [1, 9, 0, 0, 0, 4, 5, 0, 0],
+            [8, 2, 0, 1, 0, 0, 0, 4, 0],
+            [0, 0, 4, 6, 0, 2, 9, 0, 0],
+            [0, 5, 0, 0, 0, 3, 0, 2, 8],
+            [0, 0, 9, 3, 0, 0, 0, 7, 4],
+            [0, 4, 0, 0, 5, 0, 0, 3, 6],
+            [7, 0, 3, 0, 1, 8, 0, 0, 0],
+        ];
+        let solution = array![
+            [4, 3, 5, 2, 6, 9, 7, 8, 1],
+            [6, 8, 2, 5, 7, 1, 4, 9, 3],
+            [1, 9, 7, 8, 3, 4, 5, 6, 2],
+            [8, 2, 6, 1, 9, 5, 3, 4, 7],
+            [3, 7, 4, 6, 8, 2, 9, 1, 5],
+            [9, 5, 1, 7, 4, 3, 6, 2, 8],
+            [5, 1, 9, 3, 2, 6, 8, 7, 4],
+            [2, 4, 8, 9, 5, 7, 1, 3, 6],
+            [7, 6, 3, 4, 1, 8, 2, 5, 9],
+        ];
+        let result = prove_and_verify_circuit(puzzle, solution);
+        assert_eq!(result, Ok(()));
+    }
+
+    #[test]
+    fn test_incorrect_solution() {
+        let puzzle = array![
+            [0, 0, 0, 2, 6, 0, 7, 0, 1],
+            [6, 8, 0, 0, 7, 0, 0, 9, 0],
+            [1, 9, 0, 0, 0, 4, 5, 0, 0],
+            [8, 2, 0, 1, 0, 0, 0, 4, 0],
+            [0, 0, 4, 6, 0, 2, 9, 0, 0],
+            [0, 5, 0, 0, 0, 3, 0, 2, 8],
+            [0, 0, 9, 3, 0, 0, 0, 7, 4],
+            [0, 4, 0, 0, 5, 0, 0, 3, 6],
+            [7, 0, 3, 0, 1, 8, 0, 0, 0],
+        ];
+        let solution = array![
+            [1, 3, 5, 2, 6, 9, 7, 8, 1], // top-left cell changed from 4 to 1
+            [6, 8, 2, 5, 7, 1, 4, 9, 3],
+            [1, 9, 7, 8, 3, 4, 5, 6, 2],
+            [8, 2, 6, 1, 9, 5, 3, 4, 7],
+            [3, 7, 4, 6, 8, 2, 9, 1, 5],
+            [9, 5, 1, 7, 4, 3, 6, 2, 8],
+            [5, 1, 9, 3, 2, 6, 8, 7, 4],
+            [2, 4, 8, 9, 5, 7, 1, 3, 6],
+            [7, 6, 3, 4, 1, 8, 2, 5, 9],
+        ];
+        let result = prove_and_verify_circuit(puzzle, solution);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_solution_cell_out_of_range() {
+        let puzzle = array![
+            [0, 0, 0, 2, 6, 0, 7, 0, 1],
+            [6, 8, 0, 0, 7, 0, 0, 9, 0],
+            [1, 9, 0, 0, 0, 4, 5, 0, 0],
+            [8, 2, 0, 1, 0, 0, 0, 4, 0],
+            [0, 0, 4, 6, 0, 2, 9, 0, 0],
+            [0, 5, 0, 0, 0, 3, 0, 2, 8],
+            [0, 0, 9, 3, 0, 0, 0, 7, 4],
+            [0, 4, 0, 0, 5, 0, 0, 3, 6],
+            [7, 0, 3, 0, 1, 8, 0, 0, 0],
+        ];
+        let solution = array![
+            [10, 3, 5, 2, 6, 9, 7, 8, 1],
+            [6, 8, 2, 5, 7, 1, 4, 9, 3],
+            [1, 9, 7, 8, 3, 4, 5, 6, 2],
+            [8, 2, 6, 1, 9, 5, 3, 4, 7],
+            [3, 7, 4, 6, 8, 2, 9, 1, 5],
+            [9, 5, 1, 7, 4, 3, 6, 2, 8],
+            [5, 1, 9, 3, 2, 6, 8, 7, 4],
+            [2, 4, 8, 9, 5, 7, 1, 3, 6],
+            [7, 6, 3, 4, 1, 8, 2, 5, 9],
+        ];
+        let result = prove_and_verify_circuit(puzzle, solution);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_solution_wrong_shape() {
+        let puzzle = array![
+            [0, 0, 0, 2, 6, 0, 7, 0, 1],
+            [6, 8, 0, 0, 7, 0, 0, 9, 0],
+            [1, 9, 0, 0, 0, 4, 5, 0, 0],
+            [8, 2, 0, 1, 0, 0, 0, 4, 0],
+            [0, 0, 4, 6, 0, 2, 9, 0, 0],
+            [0, 5, 0, 0, 0, 3, 0, 2, 8],
+            [0, 0, 9, 3, 0, 0, 0, 7, 4],
+            [0, 4, 0, 0, 5, 0, 0, 3, 6],
+            [7, 0, 3, 0, 1, 8, 0, 0, 0],
+        ];
+        let solution = array![
+            [1, 3, 5, 2, 6, 9, 7, 8, 1],
+            [6, 8, 2, 5, 7, 1, 4, 9, 3],
+            [1, 9, 7, 8, 3, 4, 5, 6, 2],
+            [8, 2, 6, 1, 9, 5, 3, 4, 7],
+        ];
+        let result = prove_and_verify_circuit(puzzle, solution);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_valid_solution_but_wrong_public_input() {
+        use halo2wrong::halo2::{dev::MockProver, halo2curves::bn256::Fr as Fp};
+        let puzzle = array![
+            [0, 0, 0, 2, 6, 0, 7, 0, 1],
+            [6, 8, 0, 0, 7, 0, 0, 9, 0],
+            [1, 9, 0, 0, 0, 4, 5, 0, 0],
+            [8, 2, 0, 1, 0, 0, 0, 4, 0],
+            [0, 0, 4, 6, 0, 2, 9, 0, 0],
+            [0, 5, 0, 0, 0, 3, 0, 2, 8],
+            [0, 0, 9, 3, 0, 0, 0, 7, 4],
+            [0, 4, 0, 0, 5, 0, 0, 3, 6],
+            [7, 0, 3, 0, 1, 8, 0, 0, 0],
+        ];
+        let solution = array![
+            [4, 3, 5, 2, 6, 9, 7, 8, 1],
+            [6, 8, 2, 5, 7, 1, 4, 9, 3],
+            [1, 9, 7, 8, 3, 4, 5, 6, 2],
+            [8, 2, 6, 1, 9, 5, 3, 4, 7],
+            [3, 7, 4, 6, 8, 2, 9, 1, 5],
+            [9, 5, 1, 7, 4, 3, 6, 2, 8],
+            [5, 1, 9, 3, 2, 6, 8, 7, 4],
+            [2, 4, 8, 9, 5, 7, 1, 3, 6],
+            [7, 6, 3, 4, 1, 8, 2, 5, 9],
+        ];
+        let k = 11;
+        let circuit = SudokuCircuit {
+            puzzle,
+            solution,
+            marker: PhantomData,
+        };
+        // Arrange the public inputs (correctly)
+        let public_input_maingate = vec![];
+        let mut public_input_puzzle: Vec<Fp> = circuit
+            .puzzle
+            .mapv(|value| Fp::from_u128(u128::from(value)))
+            .into_raw_vec();
+
+        // Now reverse the order of elements of the public input
+        public_input_puzzle.reverse();
+
+        // Prove as normal
+        let public_inputs = vec![public_input_maingate, public_input_puzzle];
+        let prover = MockProver::run(k, &circuit, public_inputs).unwrap();
+        assert!(prover.verify().is_err());
     }
 }
