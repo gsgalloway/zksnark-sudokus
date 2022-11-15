@@ -12,6 +12,10 @@ use maingate::{MainGate, MainGateConfig, MainGateInstructions, Term};
 use ndarray::prelude::*;
 use std::marker::PhantomData;
 
+// SudokuConfig defines the columns we will use directly in our circuit,
+// as well as the configurations for all gadgets we will use. In this case,
+// we use the `maingate` gadget which is a convenience wrapper on top of the
+// standard PLONK gate and includes instructions for common primitives like `add`
 #[derive(Clone, Debug)]
 pub struct SudokuConfig {
     main_gate_config: MainGateConfig,
@@ -34,6 +38,8 @@ impl SudokuConfig {
     }
 }
 
+// SudokuCircuit is responsible for initializing its config (and all gadgets registered therein)
+// as well as defining all the constraints for the table (i.e. constructing the circuit)
 #[derive(Clone, Debug, Default)]
 pub struct SudokuCircuit<F: FieldExt> {
     pub puzzle: Array2<u8>,
@@ -67,7 +73,10 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                 let offset = 0;
                 let ctx = &mut RegionCtx::new(region, offset);
 
-                // load the board (public) into the circuit
+                // Load the puzzle (public) into the circuit.
+                // Note that this is loaded into advice columns as is the `solution`.
+                // Later we will compare all cells for the `board` against all cells
+                // in our public_input column to effectively expose this as a public input.
                 board_cells = self.load_board(&config, ctx, &self.puzzle)?;
 
                 // load the solution (private) into the circuit
@@ -113,7 +122,7 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
             },
         )?;
 
-        // mark each cell of the board as public input
+        // mark each cell of the puzzle as public input
         for (public_input_idx, assigned_value) in board_cells.iter().enumerate() {
             layouter.constrain_instance(
                 assigned_value.cell(),
@@ -169,24 +178,6 @@ impl<F: FieldExt> SudokuCircuit<F> {
 
         Ok(())
     }
-
-    // fn check_solution_against_board(
-    //     &self,
-    //     config: &SudokuConfig,
-    //     ctx: &mut RegionCtx<F>,
-    //     layouter: impl Layouter<F>,
-    //     solution_cells: &Array2<AssignedCell<F, F>>,
-    // ) -> Result<(), Error> {
-    //     let main_gate: MainGate<F> = config.main_gate();
-
-    //     // load board
-    //     let board_cells: Array2<AssignedCell<F, F>> = self.board.mapv(|value| {
-    //         let value = Value::known(F::from_u128(u128::from(value)));
-    //         main_gate.assign_value(ctx, value).unwrap()
-    //     });
-
-    //     Ok(())
-    // }
 }
 #[cfg(test)]
 mod test {
