@@ -737,7 +737,7 @@ dependencies = [
 [[package]]
 name = "halo2wrong"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/halo2wrong.git#63bde545d934e69c806ef9bc8b18f03f6ec0fe8e"
+source = "git+https://github.com/privacy-scaling-explorations/halo2wrong.git?tag=v2022_10_22#63bde545d934e69c806ef9bc8b18f03f6ec0fe8e"
 dependencies = [
  "group 0.12.1",
  "halo2_proofs",
@@ -879,7 +879,7 @@ dependencies = [
 [[package]]
 name = "maingate"
 version = "0.1.0"
-source = "git+https://github.com/privacy-scaling-explorations/halo2wrong.git#63bde545d934e69c806ef9bc8b18f03f6ec0fe8e"
+source = "git+https://github.com/privacy-scaling-explorations/halo2wrong.git?tag=v2022_10_22#63bde545d934e69c806ef9bc8b18f03f6ec0fe8e"
 dependencies = [
  "group 0.12.1",
  "halo2wrong",

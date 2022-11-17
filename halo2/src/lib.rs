@@ -1,4 +1,9 @@
-use halo2::plonk::{Column, Instance};
+pub mod utilities;
+
+use halo2::{
+    plonk::{Column, Constraints, Expression, Instance, Selector},
+    poly::Rotation,
+};
 use halo2wrong::{
     halo2::{
         arithmetic::FieldExt,
@@ -11,6 +16,9 @@ use itertools::Itertools;
 use maingate::{MainGate, MainGateConfig, MainGateInstructions, Term};
 use ndarray::prelude::*;
 use std::marker::PhantomData;
+use utilities::range_check;
+
+const MAX_SUDOKU_CELL_VALUE: usize = 10;
 
 // SudokuConfig defines the columns we will use directly in our circuit,
 // as well as the configurations for all gadgets we will use. In this case,
@@ -20,6 +28,8 @@ use std::marker::PhantomData;
 pub struct SudokuConfig {
     main_gate_config: MainGateConfig,
     public_input_puzzle: Column<Instance>,
+
+    range_check_selector: Selector,
 }
 
 impl SudokuConfig {
@@ -27,9 +37,29 @@ impl SudokuConfig {
         let main_gate_config = MainGate::configure(meta);
         let puzzle = meta.instance_column();
         meta.enable_equality(puzzle);
+
+        // enable the range-check gate
+        let range_check_selector = meta.selector();
+        meta.create_gate("range check", |meta| {
+            let selector = meta.query_selector(range_check_selector);
+
+            // This little range-check gate needs to know which advice column it's looking at
+            // for the cells whose values it will constrain. We exploit the fact that we know
+            // (from reading maingate's code) that maingate's `assign_value()` function always
+            // loads the given value into the first of its five advice columns. This is admittedly
+            // fragile and breaks the abstraction barrier of `maingate`.
+            let input_column = main_gate_config.advices()[0];
+            let input_column: Expression<F> = meta.query_advice(input_column, Rotation::cur());
+
+            let range_check_constraint = Some(range_check(input_column, MAX_SUDOKU_CELL_VALUE));
+
+            Constraints::with_selector(selector, range_check_constraint)
+        });
+
         SudokuConfig {
             main_gate_config,
             public_input_puzzle: puzzle,
+            range_check_selector,
         }
     }
 
@@ -103,14 +133,20 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                 }
 
                 // check that the solution matches the board
-                // check each cell in `board` is either zero or equals the corresponding cell in `solution`
+                // check that each cell in `board` is either zero or is equal to the corresponding cell in `solution`
                 for row_idx in 0..9 {
                     for col_idx in 0..9 {
                         let board_cell = &board_cells[[row_idx, col_idx]];
                         let solution_cell = &solution_cells[[row_idx, col_idx]];
+
+                        // query if puzzle cell is zero
                         let board_cell_is_zero = main_gate.is_zero(ctx, &board_cell)?;
+
+                        // query if puzzle cell equals solution cell
                         let board_cell_equals_solution =
                             main_gate.is_equal(ctx, board_cell, solution_cell)?;
+
+                        // assert at least one of the two expressions above is true
                         main_gate.one_or_one(
                             ctx,
                             &board_cell_is_zero,
@@ -136,6 +172,9 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
 }
 
 impl<F: FieldExt> SudokuCircuit<F> {
+    // load_board loads 81 values for either the puzzle or the solution into a single
+    // advice column, and turns on the [0, 10) range-checking gate for each row populated
+    // this way
     fn load_board(
         &self,
         config: &SudokuConfig,
@@ -145,6 +184,9 @@ impl<F: FieldExt> SudokuCircuit<F> {
         let main_gate: MainGate<F> = config.main_gate();
 
         let loaded_cells: Array2<AssignedCell<F, F>> = board.mapv(|value| {
+            // turn on the range-checking gate for this row
+            ctx.enable(config.range_check_selector).unwrap();
+
             let value = Value::known(F::from_u128(u128::from(value)));
             main_gate.assign_value(ctx, value).unwrap()
         });
@@ -152,6 +194,8 @@ impl<F: FieldExt> SudokuCircuit<F> {
         Ok(loaded_cells)
     }
 
+    // check_nine_cells assumes all values in the given cells are within [0, 10),
+    // and will check that all values are unique and sum to 45
     fn check_nine_cells<'a, I>(
         &self,
         config: &SudokuConfig,

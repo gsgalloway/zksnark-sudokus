@@ -7,9 +7,9 @@ version = "0.1.0"
 ff = "0.12"
 group = "0.12.0"
 halo2 = {package = "halo2_proofs", git = "https://github.com/privacy-scaling-explorations/halo2", tag = "v2022_10_22", features = ["dev-graph"]}
-halo2wrong = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git", default-features = true}
+halo2wrong = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git", tag = "v2022_10_22", default-features = true}
 itertools = "0.10.5"
-maingate = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git", default-features = true}
+maingate = {git = "https://github.com/privacy-scaling-explorations/halo2wrong.git", tag = "v2022_10_22", default-features = true}
 ndarray = "0.13.0"
 num-bigint = "0.4.3"
 num-integer = "0.1.45"
