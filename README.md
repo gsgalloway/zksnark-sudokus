@@ -22,10 +22,10 @@ It is not as useful for showcasing a SNARK tool's flexibility for optimization a
 
 A program can check a row/column/square correctly contains the numbers 1 through 9 in any of the following ways:
 
-1. Use a set. The program can either use the set to check for duplicates (assuming all cell values are between 1 and 9) or fill the set with all nine cells' values and check it for equality against an expected set. A couple of common implementations for sets make use of either an underlying hash table or bitset.
-1. Check that all values are contained in [1-9], are unique, and sum to 45. This is a moderately imperative approach, but it can be built using two extremely simple and widely implemented primitives: `add` and `assert_equal`
-1. Check that the given list of 9 numbers is a permutation of the list of numbers 1 through 9. PLONK and its derivatives rely on permutation checks as part of their proof system, but do not necessarily expose this functionality nicely to developer code
-2. Make use of prover hints and encode into the witness the indices of all numbers 1 through 9 in the given list of cells.
+1. Use a set. Either check for duplicates (assuming all cell values are between 1 and 9) or fill the set with all nine cells' values and check it for equality against an expected set.
+2. Check that all values are contained in [1-9], are unique, and sum to 45. This is a moderately imperative approach, but it can be built using two extremely simple and widely implemented primitives: `add` and `assert_equal`
+3. Check that the given list of 9 numbers is a permutation of the list of numbers 1 through 9. PLONK and its derivatives rely on permutation checks as part of their proof system, but do not necessarily expose this functionality nicely to developer code
+4. Make use of prover hints and encode into the witness the indices of all numbers 1 through 9 in the given list of cells.
 
 ## Implementations
 
