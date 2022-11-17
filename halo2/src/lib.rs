@@ -118,7 +118,6 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                 let solution_cells = self.load_board(&config, ctx, &self.solution)?;
 
                 // check that both the rows and the columns are valid
-                // using ndarray here to abstract away the index math for slicing rows and columns
                 for i in 0..9 {
                     let row = solution_cells.row(i);
                     let col = solution_cells.column(i);
