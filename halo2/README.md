@@ -1,6 +1,6 @@
 # Halo2 Sudoku Verifier
 
-Halo2 is a member of the PLONK family of SNARKs published and implemented by the ZCash team. It is built as a Rust library, similar to `libsnark` and `bellman`.
+Halo2 is a member of the PLONK family of SNARKs. It is built as a Rust library, similar to `libsnark` and `bellman`.
 
 ## Setup
 
