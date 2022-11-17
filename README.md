@@ -4,21 +4,19 @@ A showcase of implementing the same toy zk circuit in various SNARK tools and li
 
 ## Toy Circuit Spec
 
-The circuit must take as input both a public 9x9 board representing the puzzle, and a corresponding
-private 9x9 solution. The circuit should verify that the given solution is a valid sudoku board,
-and that it correctly maps to the given board. Un-filled cells in the puzzle are represented as cells
+The circuit should take as input a public 9x9 board representing the puzzle and a corresponding
+private 9x9 solution. It should verify that the given solution is a valid sudoku solution
+and that it correctly maps to the given puzzle. Unset cells in the puzzle are represented as cells
 with a zero value.
 
-A sudoku verifier is a useful problem to showcase in that:
+A sudoku verifier is helpful here in that:
 
-- The inherent logic in a sudoku verifier is non-trivial, but not overly large. Ideas like decomposition, code-reuse, and readability come into scope for a problem of this size
-- There are multiple different approaches to verifying a row/column/square, each requiring different language features. Some SNARK tools more naturally fit to one approach over another, which highlights the differences between them
-- It can illustrate a valid (if contrived) use-case for private inputs into snark circuits. In this case, one imagines a dapp in which users compete against one another to solve published sudoku puzzles, and must submit proof of knowledge of the solutions to a decentralized app without exposing the solution itself
+- The inherent logic required is non-trivial, but not overly large. Ideas like decomposition, code-reuse, and readability are expected to come into scope
+- There are multiple different approaches to verifying a row/column/square, each requiring different language features. Some SNARK tools more naturally fit to one approach over another, highlighting some of their differences
+- It can illustrate a valid (if contrived) use-case for private inputs to circuits. A dapp might exist that allows users to compete against one another to solve globally published sudoku puzzles, and must submit proof of knowledge of the solutions to the dapp without broadcasting the solution itself
 - It showcases the use of a simple constraint built on a conditional expression (each cell in the solution must equal the corresponding cell in the puzzle unless that puzzle cell is unset)
 
-It is not as useful for showcasing:
-
-- A SNARK tool's flexibility for hardcore optimization
+It is not as useful for showcasing a SNARK tool's flexibility for optimization and low-level customization.
 
 ### Verifying a Row/Column/Square
 
