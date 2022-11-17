@@ -8,7 +8,7 @@ Doesn't generate a proof, but will create the trace of running the program -- wh
 [SHARP](https://www.cairo-lang.org/docs/sharp.html)
 
 ```sh
-./cairo/run.s
+./run.sh
 ```
 
 To change the particular puzzle that the proof should be generated over, edit the `puzzle` and `solution` grids
