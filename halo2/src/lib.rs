@@ -23,12 +23,15 @@ const MAX_SUDOKU_CELL_VALUE: usize = 10;
 // SudokuConfig defines the columns we will use directly in our circuit,
 // as well as the configurations for all gadgets we will use. In this case,
 // we use the `maingate` gadget which is a convenience wrapper on top of the
-// standard PLONK gate and includes instructions for common primitives like `add`
+// standard PLONK gate and includes instructions for common primitives like `add`.
+// We also use a little range-checking gate built for constraining values within
+// small ranges (as opposed to a lookup-table-based range checking chip)
 #[derive(Clone, Debug)]
 pub struct SudokuConfig {
     main_gate_config: MainGateConfig,
     public_input_puzzle: Column<Instance>,
 
+    // used to toggle the range-checking gate on for the rows containing board inputs
     range_check_selector: Selector,
 }
 
@@ -112,7 +115,7 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                 // load the solution (private) into the circuit
                 let solution_cells = self.load_board(&config, ctx, &self.solution)?;
 
-                // check that both the rows and the columns are both valid
+                // check that both the rows and the columns are valid
                 // using ndarray here to abstract away the index math for slicing rows and columns
                 for i in 0..9 {
                     let row = solution_cells.row(i);
