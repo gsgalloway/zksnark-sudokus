@@ -95,7 +95,7 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
         mut layouter: impl Layouter<F>,
     ) -> Result<(), Error> {
         let main_gate: MainGate<F> = config.main_gate();
-        let mut board_cells: Array2<AssignedCell<F, F>> = array![[]];
+        let mut puzzle_cells: Array2<AssignedCell<F, F>> = array![[]];
 
         layouter.assign_region(
             || "region 0",
@@ -104,10 +104,10 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                 let ctx = &mut RegionCtx::new(region, offset);
 
                 // Load the puzzle (public) into the circuit.
-                // Note that this is loaded into advice columns as is the `solution`.
-                // Later we will compare all cells for the `board` against all cells
+                // Note that this is loaded into advice columns as is the solution.
+                // Later we will compare all cells for the puzzle against all cells
                 // in our public_input column to effectively expose this as a public input.
-                board_cells = self.load_board(&config, ctx, &self.puzzle)?;
+                puzzle_cells = self.load_board(&config, ctx, &self.puzzle)?;
 
                 // load the solution (private) into the circuit
                 let solution_cells = self.load_board(&config, ctx, &self.solution)?;
@@ -136,7 +136,7 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
                 // check that each cell in `board` is either zero or is equal to the corresponding cell in `solution`
                 for row_idx in 0..9 {
                     for col_idx in 0..9 {
-                        let board_cell = &board_cells[[row_idx, col_idx]];
+                        let board_cell = &puzzle_cells[[row_idx, col_idx]];
                         let solution_cell = &solution_cells[[row_idx, col_idx]];
 
                         // query if puzzle cell is zero
@@ -159,7 +159,7 @@ impl<F: FieldExt> Circuit<F> for SudokuCircuit<F> {
         )?;
 
         // mark each cell of the puzzle as public input
-        for (public_input_idx, assigned_value) in board_cells.iter().enumerate() {
+        for (public_input_idx, assigned_value) in puzzle_cells.iter().enumerate() {
             layouter.constrain_instance(
                 assigned_value.cell(),
                 config.public_input_puzzle,
