@@ -29,6 +29,8 @@ const MAX_SUDOKU_CELL_VALUE: usize = 10;
 #[derive(Clone, Debug)]
 pub struct SudokuConfig {
     main_gate_config: MainGateConfig,
+
+    // used to expose the sudoku puzzle as a public input to the circuit
     public_input_puzzle: Column<Instance>,
 
     // used to toggle the range-checking gate on for the rows containing board inputs
