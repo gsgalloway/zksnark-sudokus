@@ -12,7 +12,7 @@ with a zero value.
 A sudoku verifier is helpful here in that:
 
 - The inherent logic required is non-trivial, but not overly large. Ideas like decomposition, code-reuse, and readability are expected to come into scope
-- There are multiple different approaches to verifying a row/column/square, each requiring different language features. Some SNARK tools more naturally fit to one approach over another, highlighting some of their differences
+- There are multiple different approaches to verifying a row/column/square, each requiring different language features. Some SNARK tools more naturally fit to one approach over another
 - It can illustrate a valid (if contrived) use-case for private inputs to circuits. A dapp might exist that allows users to compete against one another to solve globally published sudoku puzzles, and must submit proof of knowledge of the solutions to the dapp without broadcasting the solution itself
 - It showcases the use of a simple constraint built on a conditional expression (each cell in the solution must equal the corresponding cell in the puzzle unless that puzzle cell is unset)
 
@@ -22,8 +22,8 @@ It is not as useful for showcasing a SNARK tool's flexibility for optimization a
 
 A program can check a row/column/square correctly contains the numbers 1 through 9 in any of the following ways:
 
-1. Use a set. Either check for duplicates (assuming all cell values are between 1 and 9) or fill the set with all nine cells' values and check it for equality against an expected set.
-2. Check that all values are contained in [1-9], are unique, and sum to 45. This is a moderately imperative approach, but it can be built using two extremely simple and widely implemented primitives: `add` and `assert_equal`
+1. Use a set: either check for duplicates (assuming all cell values are between 1 and 9) or fill the set with all nine cells' values and check it for equality against an expected set.
+2. Check that all values are contained in [1-9], are unique, and sum to 45. This is a moderately imperative approach, but it can be built using three extremely simple and widely implemented primitives: `check_range`, `add` and `assert_equal`
 3. Check that the given list of 9 numbers is a permutation of the list of numbers 1 through 9. PLONK and its derivatives rely on permutation checks as part of their proof system, but do not necessarily expose this functionality nicely to developer code
 4. Make use of prover hints and encode into the witness the indices of all numbers 1 through 9 in the given list of cells.
 
