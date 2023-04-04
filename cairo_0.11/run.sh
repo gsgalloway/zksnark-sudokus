@@ -2,7 +2,7 @@
 set -e
 
 BASEDIR=$(dirname $(readlink -f "$0"))
-IMAGE=sudoku-cairo
+IMAGE="sudoku-cairo-0.11"
 
 if [[ "$(docker images -q $IMAGE 2> /dev/null)" == "" ]]; then
     docker build -t $IMAGE $BASEDIR
