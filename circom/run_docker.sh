@@ -7,3 +7,10 @@ IMAGE=sudoku-circom
 if [[ "$(docker images -q $IMAGE 2> /dev/null)" == "" ]]; then
     docker build -t $IMAGE $BASEDIR
 fi
+
+docker run --rm \
+    -v $BASEDIR:/sudoku \
+    -w /sudoku \
+    -it \
+    $IMAGE \
+    yarn test
