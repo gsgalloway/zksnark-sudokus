@@ -12,4 +12,4 @@ docker run --rm \
     -e RUST_BACKTRACE=1 \
     -it \
     $IMAGE \
-    sh
+    scarb run test
