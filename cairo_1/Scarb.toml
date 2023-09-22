@@ -8,4 +8,4 @@ version = "0.1.0"
 # foo = { path = "vendor/foo" }
 
 [scripts]
-test = "cairo-test --path ."
+test = "cairo-test ."
