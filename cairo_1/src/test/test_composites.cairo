@@ -9,7 +9,7 @@ fn find_factors_recursive(x: u128, i: u128) {
     if (x % i == 0) {
         return ();
     }
-    return find_composite_recursive(x, i+1);
+    return find_factors_recursive(x, i+1);
 }
 
 #[test]
